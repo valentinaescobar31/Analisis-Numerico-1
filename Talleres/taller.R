@@ -1,4 +1,4 @@
-#Taller An·lisis NumÈrico
+#Taller An√°lisis Num√©rico
 arreglo=c(1)
 indices=c(0)
 lx=c()
