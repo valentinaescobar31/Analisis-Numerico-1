@@ -2,8 +2,6 @@ install.packages("rSymPy")#instalar paquete
 library(rSymPy)
 install.packages("ggplot2")#instalar paquete
 library(ggplot2)
-install.packages("rSymPy")#instalar paquete
-library(rSymPy)
 fx=c(1.3, 1.85, 2.6, 2.7, 2.4, 2.15, 2.1, 2.25, 2.3, 2.25, 1.95, 1.4, 0.7, 0.5, 0.25,-0.25,0   ,0.25  ,-0.5,-2,-3  ,-4  ,-4.8,-5.1,  -4,  -2, -1 ,0.1,  0.5,1.01, 1  ,1.01,   1.2 ,1  ,1.3)      
 x=c(0.9 , 1.9 , 2.6, 3  , 3.9, 4.4 , 5  , 6   , 7 ,    8 ,  9.2,10.5,11.6,12.6, 13.3,   12,10.7,10    ,8.5 ,8 ,7.5 ,7   ,6   ,4.75,5.1 ,5.48,5.6, 5.52, 5   ,4.2 , 3.5,3   ,2.1   ,1.3,0.9)
 difNewton <- function(x, y, x0) {
