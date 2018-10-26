@@ -1,0 +1,183 @@
+---
+title: "TallerEDO"
+author: "Pedro Escobar, Valentina Escobar"
+date: "26 de octubre de 2018"
+output:
+  html_document:
+    df_print: paged
+---
+## Taller EDO Metodos: Euler y Runge Kutta
+Cargando librerías:
+```{r}
+library(phaseR)
+library(pracma)
+```
+Primer Punto: Usando el método de Euler (en R) y 20 intervalos iguales y t variando de 0 a 200 segundos, resuelva numéricamente la ecuación, si el cuerpo es un cubo de lados de longitud 1m y masa igual a 1Kg. Asuma, que T0 = 180K, Te = 200K, g = 0.5 y C = 100J/(Kg/K). Hacer una representación gráfica del resultado.
+```{r}
+metodoEuler <- function(f, h, xi, yi, xf)
+{
+  N = (xf - xi) / h
+  x = y = numeric(N+1)
+  x[1] = xi; 
+  y[1] = yi;
+  i = 1
+  while (i <= N)
+  {
+    x[i+1] = x[i]+h
+    y[i+1] = y[i]+(h*f(x[i],y[i]))
+    i = i+1
+  }
+  return (data.frame(X = x, Y = y))
+}
+
+
+f <- function(x, y) {-1.68*10^(-9)*(x^4)+2.6880}
+
+e1 = metodoEuler(f, 10, 0, 180, 200)
+print(e1)
+e1[nrow(e1),]
+
+xx <- c(-3, 3); yy <- c(-1, 1)
+vectorfield(f, xx, yy, scale = 0.1)
+for (xs in seq(-1, 1, by = 0.25)) 
+{
+  sol <- rk4(f, 0, 200, xs, 100)
+  lines(sol$x, sol$y, col="purple")
+}
+
+
+```
+Tercer Punto: Obtenga 20 puntos de la solución de la ecuación, utilizando el método de Euler (los tres primeros términos)con h=0.1 
+
+```{r}
+euler1 = function(init, xis ,func) {
+  n = length(xis)
+  h = xis[2] - xis[1]
+  v.num = vector(length = n)
+  v.num[1] = init
+  for (j in 1:(n-1)) {
+    v.num [j+1] = v.num [j] +
+      h*func(xis[j], v.num[j]) }
+  v.num}
+# --- Pruebas
+f = function(x,y) -x-y-1+x^2
+xis= seq(0,2,0.1)
+euler1(1, xis, f)
+plot(xis)
+
+```
+
+Séptimo punto: Obtenga 10 puntos de la solución con h=0.1, grafíquela y compárela con el método de Euler: 
+
+dy/dx - x - y - 1 - x^2=0, y(0) = 1
+
+
+```{r blabla}
+f<-function(fcn,x,y){
+  return(eval(fcn))
+}
+
+# Solo para prueba con dy=x+y, y(0)=1
+obtenerErrorAbsoluto<-function(x,y){
+  solucion=exp(x)*((-x*exp(-x))-exp(-x)+2)
+  return(abs(y-solucion))
+}
+
+graficarCampoPendiente<-function(x0, xn, y0, yn, fcn, numpendientes, metodo){
+  apma1 <- function(t, y, parameters){
+    a <- parameters[1] 
+    dy <- a*(f(fcn, t, y))
+    list(dy)
+  } 
+  apma1.flowField <- flowField(apma1, x = c(x0, xn), 
+                               y   = c(y0, yn), parameters = c(1), 
+                               points = numpendientes, system = "one.dim", 
+                               add = FALSE, xlab = "x", ylab = "y", 
+                               main = metodo)
+  grid()
+}
+
+graficarSolucionNumerica<-function (x, y){
+  points (x, y, pch=20, col="blue")
+  for (i in 2:length(x)){
+    segments(x[i-1], y[i-1], x[i], y[i], col="red")
+  }
+}
+
+erreka4<-function(dy, ti, tf, y0, h, graficar=TRUE, numpendientes=10){
+  t<-seq(ti, tf, h)
+  y<-c(y0)
+  cat("x    |y         |k1        |k2        |k3        |k4       |error absoluto\n")
+  for(i in 2:length(t)){
+    k1=h*f(dy, t[i-1], y[i-1])
+    k2=h*f(dy, t[i-1]+h/2, y[i-1]+k1*(0.5))
+    k3=h*f(dy, t[i-1]+h/2, y[i-1]+k2*(0.5))
+    k4=h*f(dy, t[i-1]+h, y[i-1]+k3)
+    y<-c(y, y[i-1]+1/6*(k1+2*k2+2*k3+k4))
+    cat(t[i-1]," | ", y[i-1]," | ",k1," | ",k2," | ",k3," | ",k4," | ",obtenerErrorAbsoluto(t[i-1],y[i-1]),"\n")
+  }
+  if (graficar){
+    graficarCampoPendiente(min(t), max(t), min(y), max(y), dy, numpendientes, "RK4")
+    graficarSolucionNumerica(t, y)
+  }
+  rta<-list(w=y, t=t)
+}
+
+erreka3<-function(dy, ti, tf, y0, h, graficar=TRUE, numpendientes=10){
+  t<-seq(ti, tf, h)
+  y<-c(y0)
+  cat("x    |y         |k1         |k2        |k3       |error absoluto\n")
+  for(i in 2:length(t)){
+    k1=h*f(dy, t[i-1], y[i-1])
+    k2=h*f(dy, t[i-1]+h/2, y[i-1]+k1*(0.5))
+    k3=h*f(dy, t[i-1]+h, y[i-1]-k1+2*k2)
+    y<-c(y, y[i-1]+1/6*(k1+4*k2+k3))
+    cat(t[i-1]," | ", y[i-1]," | ",k1," | ",k2," | ",k3," | ",obtenerErrorAbsoluto(t[i-1],y[i-1]),"\n")
+  }
+  if (graficar){
+    graficarCampoPendiente(min(t), max(t), min(y), max(y), dy, numpendientes, "RK3")
+    graficarSolucionNumerica(t, y)
+  }
+  rta<-list(w=y, t=t)
+}
+r<-erreka4(expression(x+y+1-x^2), 0, 1, 1, 0.1)
+
+r2<-erreka3(expression(x+y+1-x^2), 0, 1, 1, 0.1)
+
+```
+Ahora el método de Euler:
+```{r}
+metodoEuler <- function(f, h, xi, yi, xf)
+{
+  N = (xf - xi) / h
+  x = y = numeric(N+1)
+  x[1] = xi; 
+  y[1] = yi;
+  i = 1
+  while (i <= N)
+  {
+    x[i+1] = x[i]+h
+    y[i+1] = y[i]+(h*f(x[i],y[i]))
+    i = i+1
+  }
+  return (data.frame(X = x, Y = y))
+}
+
+f <- function(x, y) {x-y}
+dy<- function(x,y){x+y+1-x^2}
+
+e1 = metodoEuler(dy, 0.1, 0, 1, 1)
+
+e1[nrow(e1),]
+
+e1
+
+xx <- c(-3, 3); yy <- c(-1, 1)
+vectorfield(f, xx, yy, scale = 0.1)
+for (xs in seq(-1, 1, by = 0.25)) 
+{
+  sol <- rk4(f, 0, 1, xs, 100)
+  lines(sol$x, sol$y, col="purple")
+}
+```
+Al comparar las tablas se pueden ver valores muy diferentes
