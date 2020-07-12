@@ -1,2 +1,2 @@
 # Analisis-Numerico
-Ejercicios y trabajos en clase
+Ejercicios de análisis numérico en R y Python
